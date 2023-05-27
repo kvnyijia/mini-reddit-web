@@ -6,6 +6,7 @@ type InputFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   name: string;
   label: string;
   placeholder: string;
+  type: string;
 };
 
 export const InputField: React.FC<InputFieldProps> = ({label, size:_, ...props}) => {
@@ -13,7 +14,7 @@ export const InputField: React.FC<InputFieldProps> = ({label, size:_, ...props})
   return (
     <FormControl isInvalid={!!error}>
       <FormLabel htmlFor={field.name}>{label}</FormLabel>
-      <Input {...field} {...props} id={field.name} type={'password'} placeholder={props.placeholder} />
+      <Input {...field} {...props} id={field.name} type={props.type} placeholder={props.placeholder} />
       {error ? <FormErrorMessage>{error}</FormErrorMessage> : null}
     </FormControl>
   );

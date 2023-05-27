@@ -3,24 +3,36 @@ import {Form, Formik} from "formik"
 import { FormControl, FormLabel, Input, FormErrorMessage, Box, Button } from "@chakra-ui/react";
 import { Wrapper } from "../components/Wrapper";
 import { InputField } from "../components/InputField"
+import { useMutation } from "urql";
 
 interface registerProps {
 
 }
 
-
+const REGISTER_MUT = `
+mutation Register($username: String!, $password: String!) {
+  register(options: {username: $username, password: $password}) {
+    errors {
+      field
+      message
+    }
+    user {
+      createdAt
+      id
+      updatedAt
+      username
+    }
+  }
+}`
 
 export const Register: React.FC<registerProps> = ({}) => {
+  const [, register] = useMutation(REGISTER_MUT)
   return (
     <Wrapper variant="small">
     <Formik
       initialValues={{ username: '', password: '' }}
       onSubmit={(values, actions) => {
-        console.log(values);
-        // setTimeout(() => {
-        //   alert(JSON.stringify(values, null, 2))
-        //   actions.setSubmitting(false)
-        // }, 1000)
+        return register(values);
       }}
     >
       {({isSubmitting}) => (
@@ -29,28 +41,19 @@ export const Register: React.FC<registerProps> = ({}) => {
             name="username"
             placeholder="username"
             label="Username"
+            type="text"
           />
           <Box mt={4}>
-          <InputField
-            name="password"
-            placeholder="password"
-            label="Password"
-          />
+            <InputField
+              name="password"
+              placeholder="password"
+              label="Password"
+              type="password"
+            />
           </Box>
           <Button mt={4} type="submit" isLoading={isSubmitting} colorScheme='teal'>
             register
           </Button>
-          {/* <div>hhhhhhhhhhhhhh</div> */}
-          {/* <FormControl>
-            <FormLabel htmlFor="username">Username</FormLabel>
-            <Input 
-              value={values.username}
-              onChange={handleChange}
-              id="username"
-              placeholder='Username' 
-            /> */}
-            {/* <FormErrorMessage>{form.errors.name}</FormErrorMessage> */}
-          {/* </FormControl> */}
         </Form>
       )}
     </Formik>
