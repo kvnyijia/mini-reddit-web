@@ -1,7 +1,26 @@
 import { cacheExchange } from '@urql/exchange-graphcache';
-import { fetchExchange } from 'urql';
+import { fetchExchange, Exchange } from 'urql';
 import { LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation } from '../generated/graphql';
 import { betterUpdateQuery } from "./betterUpdateQuery";
+import { pipe, tap } from 'wonka';
+// import { useRouter } from 'next/router';
+import Router from 'next/router';
+import { NOT_LOGIN_ERROR_MSG } from "../constants";
+
+// Handle errors at a global level
+const errorExchange: Exchange = ({ forward }) => ops$ => {
+  // const router = useRouter();   
+  return pipe(
+    forward(ops$),
+    tap(({ error }) => {
+      console.log(error);
+      if (error?.message.includes(NOT_LOGIN_ERROR_MSG)) {
+        // router.replace("/login");
+        Router.replace("/login");
+      }
+    })
+  );
+};
 
 export const createUrqlClient = (ssrExchange: any) => ({
   url: 'http://localhost:4000/graphql',
@@ -50,6 +69,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
         }
       }
     }), 
+    errorExchange,
     ssrExchange,
     fetchExchange 
   ],
