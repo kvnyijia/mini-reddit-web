@@ -1,5 +1,5 @@
-import { cacheExchange } from '@urql/exchange-graphcache';
-import { fetchExchange, Exchange } from 'urql';
+import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
+import { fetchExchange, Exchange, stringifyVariables } from 'urql';
 import { LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation } from '../generated/graphql';
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import { pipe, tap } from 'wonka';
@@ -13,7 +13,7 @@ const errorExchange: Exchange = ({ forward }) => ops$ => {
   return pipe(
     forward(ops$),
     tap(({ error }) => {
-      console.log(error);
+      // console.log(error);
       if (error?.message.includes(NOT_LOGIN_ERROR_MSG)) {
         // router.replace("/login");
         Router.replace("/login");
@@ -26,6 +26,14 @@ export const createUrqlClient = (ssrExchange: any) => ({
   url: 'http://localhost:4000/graphql',
   exchanges: [
     cacheExchange({
+      keys: {
+        PaginatedPosts: () => null,
+      },
+      resolvers: {
+        Query: {
+          posts: cursorPagination(),
+        },
+      },
       updates: {
         Mutation: {
           logout: (_result, args, cache, info) => {
@@ -81,3 +89,43 @@ export const createUrqlClient = (ssrExchange: any) => ({
     };
   },
 })
+
+const cursorPagination = (): Resolver => {
+  return (_parent, fieldArgs, cache, info) => {
+    const { parentKey: entityKey, fieldName } = info;
+    // console.log("key=", entityKey, "filed=", fieldName);
+    const allFields = cache.inspectFields(entityKey);
+    // console.log("allFields=", allFields);
+
+    const fieldInfos = allFields.filter(info => info.fieldName === fieldName);
+    const size = fieldInfos.length;
+    if (size === 0) {
+      return undefined;
+    }
+
+    // Check is data is in the cache, and read data from the cache and return them 
+    // console.log("fieldArgs=", fieldArgs);
+    const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
+    const isItInTheCache = cache.resolve(cache.resolve(entityKey, fieldKey) as string, "posts");
+    // console.log("isItInTheCache=", isItInTheCache);
+    info.partial = !isItInTheCache;
+
+    let hasMore = true;
+    const results: string[] = [];
+    fieldInfos.forEach(fi => {
+      const key = cache.resolve(entityKey, fi.fieldKey) as string;
+      const data = cache.resolve(key, "posts") as string[];
+      const _hasMore = cache.resolve(key, "hasMore") as boolean;
+      if (!_hasMore) {
+        hasMore = _hasMore;
+      }
+      // console.log(data);
+      results.push(...data);
+    });
+    return {
+      __typename: "PaginatedPosts",
+      hasMore,
+      posts: results,
+    };
+  };
+};
