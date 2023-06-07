@@ -13,6 +13,7 @@ import NextLink from "next/link";
 
 const ChangePassword: NextPage<{token: string}> = ({token}) => {
   const router = useRouter();
+  // console.log(router.query);
   const [,changePassword] = useChangePasswordMutation();
   const [tokenError, setTokenError] = useState('');
   return (
@@ -23,6 +24,7 @@ const ChangePassword: NextPage<{token: string}> = ({token}) => {
         const response = await changePassword({
           newPassword: values.newPassword,
           token,
+          // token: typeof router.query.token === "string" ? router.query.string as string : "",
         });
         if (response.data?.changePassword.errors) {
           const errorMap = toErrorMap(response.data.changePassword.errors);
