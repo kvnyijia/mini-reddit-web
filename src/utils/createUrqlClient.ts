@@ -41,7 +41,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
             const allFields = cache.inspectFields("Query");
             const fieldInfos = allFields.filter(info => info.fieldName === "posts");
             fieldInfos.forEach((fi) => {
-              cache.invalidate("Query", "posts", fi.arguments);
+              cache.invalidate("Query", "posts", fi.arguments || {});  // If fi possibly be null
             });
             cache.invalidate('Query', 'posts', {
               limit: 10,
