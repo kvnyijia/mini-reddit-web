@@ -97,6 +97,7 @@ export type Post = {
   textSnippet: Scalars['String']['output'];
   title: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
+  voteStatus?: Maybe<Scalars['Int']['output']>;
 };
 
 export type PostInput = {
@@ -144,7 +145,7 @@ export type UsernamePasswordInput = {
   username: Scalars['String']['input'];
 };
 
-export type PostSnippetFragment = { __typename?: 'Post', id: number, title: string, text: string, textSnippet: string, creatorId: number, points: number, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, username: string, email: string } };
+export type PostSnippetFragment = { __typename?: 'Post', id: number, title: string, text: string, textSnippet: string, creatorId: number, points: number, createdAt: string, updatedAt: string, voteStatus?: number | null, creator: { __typename?: 'User', id: number, username: string, email: string } };
 
 export type RegularErrorFragment = { __typename?: 'FieldError', field: string, message: string };
 
@@ -213,7 +214,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, title: string, text: string, textSnippet: string, creatorId: number, points: number, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, username: string, email: string } }> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, title: string, text: string, textSnippet: string, creatorId: number, points: number, createdAt: string, updatedAt: string, voteStatus?: number | null, creator: { __typename?: 'User', id: number, username: string, email: string } }> } };
 
 export const PostSnippetFragmentDoc = gql`
     fragment PostSnippet on Post {
@@ -225,6 +226,7 @@ export const PostSnippetFragmentDoc = gql`
   points
   createdAt
   updatedAt
+  voteStatus
   creator {
     id
     username
