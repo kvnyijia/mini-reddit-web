@@ -1,12 +1,13 @@
 import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
 import { fetchExchange, Exchange, stringifyVariables } from 'urql';
 import { gql } from '@urql/core';
-import { LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation, VoteMutationVariables } from '../generated/graphql';
+import { LoginMutation, LogoutMutation, MeDocument, MeQuery, PostSnippetFragment, RegisterMutation, VoteMutationVariables } from '../generated/graphql';
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import { pipe, tap } from 'wonka';
 // import { useRouter } from 'next/router';
 import Router from 'next/router';
 import { NOT_LOGIN_ERROR_MSG } from "../constants";
+import { isServer } from './isServer';
 
 // Handle errors at a global level
 const errorExchange: Exchange = ({ forward }) => ops$ => {
@@ -23,7 +24,13 @@ const errorExchange: Exchange = ({ forward }) => ops$ => {
   );
 };
 
-export const createUrqlClient = (ssrExchange: any) => ({
+export const createUrqlClient = (ssrExchange: any, ctx: any) => {
+  let cookie = '';
+  if (isServer()) {
+    cookie = ctx.req.headers.cookie;
+  }
+
+  return ({
   url: 'http://localhost:4000/graphql',
   exchanges: [
     cacheExchange({
@@ -50,10 +57,10 @@ export const createUrqlClient = (ssrExchange: any) => ({
               { id: postId }
             );
             if (data) {
-              if (data.voteStatus === value) {
+              if ((data as PostSnippetFragment).voteStatus === value) {
                 return;
               }
-              const newPoints = (data.points as number) + (!data.voteStatus ? 1 : 2) * value;
+              const newPoints = ((data as PostSnippetFragment).points as number) + (!(data as PostSnippetFragment).voteStatus ? 1 : 2) * value;
               cache.writeFragment(
                 gql`
                   fragment __ on Post {
@@ -124,11 +131,12 @@ export const createUrqlClient = (ssrExchange: any) => ({
   fetchOptions: () => {
     return {
       credentials: 'include' as const,
-      headers: { },
+      headers: cookie ? { cookie } : undefined,
       // headers: { credentials: 'include' },
     };
   },
 })
+};
 
 const cursorPagination = (): Resolver => {
   return (_parent, fieldArgs, cache, info) => {
