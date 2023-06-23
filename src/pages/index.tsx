@@ -1,11 +1,12 @@
 import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from "../utils/createUrqlClient";
-import { usePostsQuery } from "../generated/graphql";
+import { useDeletePostMutation, usePostsQuery } from "../generated/graphql";
 import { Layout } from "../components/Layout";
 import NextLink from "next/link";
-import { Box, Button, Flex, Heading, Link, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, IconButton, Link, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { UpddotSection } from "../components/UpdootSection";
+import { DeleteIcon } from '@chakra-ui/icons';
 
 
 const Index = () => {
@@ -16,6 +17,7 @@ const Index = () => {
   const [{data, fetching}] = usePostsQuery({
     variables,
   });
+  const [, deletePost] = useDeletePostMutation();
 
   if (!fetching && !data) {
     return <div>No post exists</div>;
@@ -30,14 +32,24 @@ const Index = () => {
         {data!.posts.posts.map((p) => (
           <Flex key={p.id} p={5} shadow="md" borderWidth="1px">
             <UpddotSection post={p}/>
-            <Box>
+            <Box flex={1}>
               <NextLink href="/post/[id]" as={`/post/${p.id}`}>
               <Link>
                 <Heading fontSize="xl">{p.title}</Heading> 
               </Link>
               </NextLink>
               <Text>Posted by {p.creator.username}</Text>
-              <Text mt={4}>{p.textSnippet}</Text>
+              <Flex>
+                <Text flex={1} mt={4}>{p.textSnippet}</Text>
+                <IconButton 
+                  ml="auto" 
+                  icon={<DeleteIcon />} 
+                  aria-label="Delete Post"
+                  onClick={() => {
+                    deletePost({deletePostId: p.id})
+                  }}
+                />
+              </Flex>
             </Box> 
           </Flex>
         ))}
