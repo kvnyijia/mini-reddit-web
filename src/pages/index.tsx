@@ -7,6 +7,7 @@ import { Box, Button, Flex, Heading, IconButton, Link, Stack, Text } from "@chak
 import { useState } from "react";
 import { UpddotSection } from "../components/UpdootSection";
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { EditDeletePostButtons } from '../components/EditDeletePostButtons';
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -41,24 +42,11 @@ const Index = () => {
               <Text>Posted by {p.creator.username}</Text>
               <Flex>
                 <Text flex={1} mt={4}>{p.textSnippet}</Text>
-                {meData?.me?.id !== p.creatorId ? null : <Box ml="auto">
-                  <NextLink href="/post/edit/[id]" as={`/post/edit/${p.id}`}>
-                    <IconButton 
-                      as={Link}
-                      mr={4}
-                      icon={<EditIcon />} 
-                      aria-label="Edit Post"
-                    />
-                  </NextLink>
-                  <IconButton 
-                    ml="auto" 
-                    icon={<DeleteIcon />} 
-                    aria-label="Delete Post"
-                    onClick={() => {
-                      deletePost({deletePostId: p.id})
-                    }}
-                  />
-                </Box>}
+                {meData?.me?.id !== p.creatorId ? null : 
+                  <Box ml="auto">
+                    <EditDeletePostButtons id={p.id}/>
+                  </Box>
+                }
               </Flex>
             </Box> 
           </Flex>

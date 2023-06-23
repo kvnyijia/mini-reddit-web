@@ -6,6 +6,7 @@ import { createUrqlClient } from "../../utils/createUrqlClient";
 import { withUrqlClient } from "next-urql";
 import { Box, Heading } from "@chakra-ui/react";
 import { useGetPostIdFromUri } from "../../utils/useGetPostIdFromUri";
+import { EditDeletePostButtons } from "../../components/EditDeletePostButtons";
 
 const Post = ({}) => {
   const [{data, error, fetching}] = useGetPostIdFromUri();
@@ -35,7 +36,10 @@ const Post = ({}) => {
       <Heading mb={4}>
         {data.post.title}
       </Heading>
-      {data.post.text}
+      <Box mb={4}>
+        {data.post.text}
+      </Box>
+      <EditDeletePostButtons id={data.post.id}/>
     </Layout>
   );
 };
