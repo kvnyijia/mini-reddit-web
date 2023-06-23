@@ -5,16 +5,10 @@ import { usePostQuery } from "../../generated/graphql";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 import { withUrqlClient } from "next-urql";
 import { Box, Heading } from "@chakra-ui/react";
+import { useGetPostIdFromUri } from "../../utils/useGetPostIdFromUri";
 
 const Post = ({}) => {
-  const router = useRouter();
-  const postId = typeof router.query.id === 'string' ? parseInt(router.query.id) : -1
-  const [{data, error, fetching}] = usePostQuery({
-    pause: postId === -1,
-    variables: {
-      postId,
-    },
-  });
+  const [{data, error, fetching}] = useGetPostIdFromUri();
   
   if (fetching) {
     return (
