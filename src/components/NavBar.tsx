@@ -3,12 +3,14 @@ import React from "react";
 import NextLink from "next/link";
 import { useMeQuery, useLogoutMutation } from "../generated/graphql";
 import { isServer } from "../utils/isServer";
+import { useRouter } from "next/router";
 
 interface NavBarProps {
 
 }
 
 export const NavBar: React.FC<NavBarProps> = ({}) => {
+  const router = useRouter();
   const [{fetching: logoutFetching}, logout] = useLogoutMutation();
   const [{data, fetching}] = useMeQuery({
     pause: isServer(),
@@ -19,13 +21,13 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
   } else if (!data?.me) {
     body = (
       <>
-      <NextLink href="/login">
-      <Link color='white' mr={2}>login</Link>
-    </NextLink>
-    <NextLink href="/register">
-      <Link color='white'>register</Link>
-    </NextLink>
-    </>
+        <NextLink href="/login">
+          <Link color='white' mr={2}>login</Link>
+        </NextLink>
+        <NextLink href="/register">
+          <Link color='white'>register</Link>
+        </NextLink>
+      </>
     )
   } else {
     body = (
@@ -37,12 +39,15 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
         </NextLink>
         <Box mr={2}>{data.me.username}</Box>
         <Button 
-          onClick={() => { logout("" as any); }}
+          onClick={async () => { 
+            await logout("" as any); 
+            router.reload();
+          }}
           isLoading={logoutFetching}
           variant="link"
         >
           logout
-          </Button>
+        </Button>
       </Flex>
     )
   }
