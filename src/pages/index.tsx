@@ -1,10 +1,10 @@
 import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from "../utils/createUrqlClient";
-import { useMeQuery, usePostsQuery } from "../generated/graphql";
+import { PostsQuery, useMeQuery, usePostsQuery } from "../generated/graphql";
 import { Layout } from "../components/Layout";
 import NextLink from "next/link";
 import { Box, Button, Flex, Heading, IconButton, Link, Stack, StackDivider, Text } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UpddotSection } from "../components/UpdootSection";
 import { EditDeletePostButtons } from '../components/EditDeletePostButtons';
 
@@ -39,9 +39,9 @@ const Index = () => {
             <UpddotSection post={p}/>
             <Box flex={1}>
               <NextLink href="/post/[id]" as={`/post/${p.id}`}>
-              <Link>
+              {/* <Link> */}
                 <Heading fontSize="xl">{p.title}</Heading> 
-              </Link>
+              {/* </Link> */}
               </NextLink>
               <Text>Posted by {p.creator.username}</Text>
               <Flex>
